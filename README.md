@@ -1,4 +1,4 @@
----
+<!--
 sword:
   schema: 1
   name: soft.models
@@ -10,7 +10,7 @@ sword:
   build: [none]
   ng: [ecore-model]
   apps: []
----
+-->
 
 # soft.models
 
