@@ -35,7 +35,7 @@ NG-specific models (`physical`, `simulation`) are NOT here: they live in `sw/sw.
 
 ```mermaid
 flowchart LR
-    M["soft.models<br/>ecore.ecore, library.ecore, tournament.ecore"] --> G["soft.gen generators<br/>soft.generator.cpp / go / ts"]
+    M["soft.models<br/>ecore.ecore, library.ecore, tournament.ecore"] --> G["soft.gen generators<br/>v2 soft.gen (go, ts), v1 soft.generator.cpp"]
     G --> CPP[soft.cpp]
     G --> GO[soft.go]
     G --> TS[soft.ts]
@@ -76,15 +76,15 @@ The same call is made with `-m /models/library.ecore -o /pwd -P /pwd/generator.p
 
 ### Linux (Docker)
 
-Not applicable to this repository. The generators are shipped as Docker images used by the consumers:
+Not applicable to this repository. The consumers run the generators of [soft.gen](https://github.com/masagroup/soft.gen):
 
-| Image | Used by |
+| Generator | Used by |
 |---|---|
-| `masagroup/soft.generator.cpp` | `soft.cpp/build.xml` |
-| `masagroup/soft.generator.go` | `soft.go/Makefile`, `sw.api.ng.go/generate.sh` |
-| `masagroup/soft.generator.ts` | `soft.ts/Makefile` |
+| soft.gen v2: the Go command `soft.gen` (`go`, `ts`), at the version `SOFT_GEN_VERSION` of each Makefile | `soft.go/Makefile`, `soft.ts/Makefile`; the `release/v2` branches of soft.sync.go and sw.api.ng.go |
+| v1 image `masagroup/soft.generator.cpp` (Java, Acceleo), no tag | `soft.cpp/build.xml` |
+| v1 image `masagroup/soft.generator.go` (Java, Acceleo), no tag | `sw.api.ng.go/generate.sh` and `soft.sync.go/Makefile` on their `master` |
 
-`soft.go/Makefile` and `soft.ts/Makefile` (line 10 of each) run `docker run ... -v $(realpath ../models):/models ... masagroup/soft.generator.go|ts -m /models/<model> -o /pwd/<dir> -P /pwd/generator.properties`, so a local `make generate` expects a sibling `models` checkout. Image tags used: UNVERIFIED.
+soft.go and soft.ts no longer use the v1 images `masagroup/soft.generator.go|ts`: they generate with soft.gen v2 (`go run .../cmd/soft-gen@v2.0.0-alpha.2` until 2026-10-22, the image `masagroup/soft.gen:<SOFT_GEN_VERSION>` since). Their Makefiles read the models from a sibling `../models` checkout (mounted on `/models` when the generator runs in a container), so a local `make generate` expects one.
 
 ### Other
 
@@ -122,7 +122,7 @@ Symbolic references from this repository:
 | `github.com/masagroup/soft.go/ecore/ecore.CompactEObjectContainer` | `ecore.ecore`, GenGo package annotation `rootExtendsClass` | Go root class extended by the generated Ecore Go objects; points into [soft.go](https://github.com/masagroup/soft.go) |
 | `module=github.com/masagroup/soft.go` and `packages=...test/tournament-reflective/...` | `generate.tournament-reflective.go.launch` | Go module path of the generated tests in `soft.go` |
 | `../../../cpp`, `../../../go`, `../../../ts` | launch files | Output directories: [soft.cpp](https://github.com/masagroup/soft.cpp), [soft.go](https://github.com/masagroup/soft.go), [soft.ts](https://github.com/masagroup/soft.ts) |
-| `soft.generator.cpp`, `.go`, `.ts` | launch files | Generator projects in [soft.gen](https://github.com/masagroup/soft.gen) |
+| `soft.generator.cpp`, `.go`, `.ts` | launch files | v1 generator projects (Java, Acceleo) of [soft.gen](https://github.com/masagroup/soft.gen), in its history up to the `v1.x` tags |
 
 Reverse dependencies (who pulls this repository):
 
@@ -184,14 +184,14 @@ Detail keys in `ecore.ecore` (counts): `lazy` 42, `extension` 36, `default` 30, 
 
 ```mermaid
 flowchart LR
-    E["*.ecore<br/>(this repo)"] --> J["soft.gen generators<br/>Java, Acceleo, Maven"]
+    E["*.ecore<br/>(this repo)"] --> J["soft.gen generators<br/>v2: Go (go, ts)<br/>v1: Java, Acceleo (cpp)"]
     J --> R1["soft.cpp<br/>generated sources + tests"]
     J --> R2["soft.go<br/>generated sources + tests"]
     J --> R3["soft.ts<br/>generated sources + tests"]
     R2 --> D["NG Go components"]
 ```
 
-`*.ecore` -> generators `soft.generator.{cpp,go,ts}` (Java, Acceleo, Maven in `soft.gen`) -> sources written into `soft.cpp` / `soft.go` / `soft.ts` and their tests or examples. Those runtime libraries provide Ecore objects to downstream C++, Go and TypeScript components. See the ecosystem wiki page "esync and ecore" for the full model/esync picture.
+`*.ecore` -> generators of `soft.gen` (v2, Go: `soft.gen go` and `soft.gen ts` for soft.go and soft.ts; v1, Java and Acceleo: the image `masagroup/soft.generator.cpp` for soft.cpp) -> sources written into `soft.cpp` / `soft.go` / `soft.ts` and their tests or examples. Those runtime libraries provide Ecore objects to downstream C++, Go and TypeScript components. See the ecosystem wiki page "esync and ecore" for the full model/esync picture.
 
 ## CI/CD
 
@@ -229,5 +229,4 @@ No audit is mentioned in the scan report (UNVERIFIED whether one exists). Docume
 * UNVERIFIED: which remote is canonical; consumer CI uses `masagroup/soft.models`.
 * UNVERIFIED: whether the `soft.go` CI pin behind HEAD is intentional.
 * UNVERIFIED: meaning and dating of the annotation-source year suffixes (2018/2019/2020).
-* UNVERIFIED: Docker image tags used for `masagroup/soft.generator.cpp|go|ts`.
 * UNVERIFIED: origin of `library.ecore` and `tournament.ecore` (inferred from nsURI only).
