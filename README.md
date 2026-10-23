@@ -230,3 +230,7 @@ No audit is mentioned in the scan report (UNVERIFIED whether one exists). Docume
 * UNVERIFIED: whether the `soft.go` CI pin behind HEAD is intentional.
 * UNVERIFIED: meaning and dating of the annotation-source year suffixes (2018/2019/2020).
 * UNVERIFIED: origin of `library.ecore` and `tournament.ecore` (inferred from nsURI only).
+
+## Legacy notes
+
+The repository had no README before this one (masa/master before 8a997ec).
