@@ -266,3 +266,20 @@ The workspace helper scripts `update.sh`, `diff.sh` and `status.sh` of the `soft
 * `library.ecore` (nsURI `http:///org/eclipse/emf/examples/library/library.ecore/1.0.0`) and `tournament.ecore` (nsURI `http://mattsch.com/emf/examples/tournament`) look derived from public EMF examples; origin inferred from the nsURI only.
 * XML Schema types in `ExtendedMetaData` annotations (`http://www.w3.org/2001/XMLSchema#string`, etc.).
 * No version is pinned in this repository.
+
+## Interfaces
+
+The `generate.*.launch` files are Eclipse run configurations of the v1 generators. They run from the `soft.gen` workspace, where `../../../models` resolves to this repository and `../../../cpp|go|ts` to the runtime repositories.
+
+| Launch file | Main class | Program arguments |
+|---|---|---|
+| `generate.ecore.cpp.launch` | `soft.generator.cpp.Generate` | `-m ../../../models/ecore.ecore -o ../../../cpp -t generateModel -t generateLibraryCMakeSources -t generateTests -t generateTestsCMakeSources -t generateTestsCMakeDependencies` |
+| `generate.ecore.go.launch` | `soft.generator.go.Generate` | `-m ../../../models/ecore.ecore -o ../../../go` |
+| `generate.ecore.ts.launch` | `soft.generator.ts.Generate` | `-m ../../../models/ecore.ecore -o ../../../ts -P ../../../ts/generator.properties -t generateModel -t generateTests` |
+| `generate.library.cpp.launch` | `soft.generator.cpp.Generate` | `-m ../../../models/library.ecore -o ../../../cpp` |
+| `generate.library.go.launch` | `soft.generator.go.Generate` | `-m ../../../models/library.ecore -o ../../../go/test` |
+| `generate.library.ts.launch` | `soft.generator.ts.Generate` | `-m ../../../models/library.ecore -o ../../../ts/examples -P ../../../ts/generator.properties -p accessors=property` |
+| `generate.tournament.go.launch` | `soft.generator.go.Generate` | `-m ../../../models/tournament.ecore -o ../../../go/test` |
+| `generate.tournament-reflective.go.launch` | `soft.generator.go.Generate` | `-m ../../../models/tournament.ecore -o ../../../go -P ../../../go/generator.properties -p featureDelegation=Reflective -p module=github.com/masagroup/soft.go -p packages=...` |
+
+Generator flags visible in these files: `-m` model, `-o` output directory, `-P` properties file, `-p key=value` single property, `-t` template or task (repeatable).
